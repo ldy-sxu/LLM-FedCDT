@@ -15,5 +15,6 @@ FedCDT-LLM innovatively combines Multimodal Fusion with Centralized Federated Le
 The project code is divided into two main parts: the Main Experiment Modules (implementing the core FedCDT-LLM workflow using FedLab) and the Centralized Robustness Experiment Module (used for the discussion section of the paper).
 ### Part I: FedCDT-LLM Core Framework (Main Experiment)
 <img width="643" height="280" alt="1760682218690" src="https://github.com/user-attachments/assets/8c916c19-3d4f-4142-862c-ec8d4ed4e5b8" />
+
 ### Part II: Centralized Text Modality Effect Experiment (Robustness Analysis)
 <img width="642" height="119" alt="1760682275599" src="https://github.com/user-attachments/assets/c66ec52e-a9f9-4401-b672-04b486a77e00" />
