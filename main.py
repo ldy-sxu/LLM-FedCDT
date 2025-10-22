@@ -24,26 +24,23 @@ os.environ['NUMEXPR_MAX_THREADS'] = '20'
 def parse_args():
     p = argparse.ArgumentParser("FedLab MultiModal CDT")
     p.add_argument("--img_dir", type=str,
-                   default=r"...",
-                   help="图像数据目录")
+                   default=r"...")
     p.add_argument("--label_txt", type=str,
-                   default=r"...",
-                   help="标签文件路径")
+                   default=r"...")
     p.add_argument("--desc_xlsx", type=str,
-                   default=r"...",
-                   help="文本描述文件路径（保持兼容性）")
-    p.add_argument("--bert_model", type=str, default=r"...", help="BERT模型名称")
+                   default=r"...")
+    p.add_argument("--bert_model", type=str, default=r"...")
 
-    p.add_argument("--total_clients", type=int, default=10, help="客户端总数")
-    p.add_argument("--com_round", type=int, default=50, help="联邦学习的总通信轮次")
-    p.add_argument("--sample_ratio", type=float, default=1.0, help="每轮参与训练的客户端比例")
-    p.add_argument("--batch_size", type=int, default=32, help="批次大小")
-    p.add_argument("--epochs", type=int, default=2, help="单轮通信中对本地数据的训练轮次")
-    p.add_argument("--lr", type=float, default=5e-5, help="学习率")
-    p.add_argument("--max_len", type=int, default=128, help="BERT文本最大长度")
-    p.add_argument("--gpu", action="store_true", help="是否使用 GPU")
-    p.add_argument("--alpha", type=float, default=0.7, help="Dirichlet分布参数，控制数据非IID程度")
-    p.add_argument("--output_dir", type=str, default="./output", help="结果输出目录")
+    p.add_argument("--total_clients", type=int, default=10)
+    p.add_argument("--com_round", type=int, default=50)
+    p.add_argument("--sample_ratio", type=float, default=1.0)
+    p.add_argument("--batch_size", type=int, default=32)
+    p.add_argument("--epochs", type=int, default=2)
+    p.add_argument("--lr", type=float, default=5e-5)
+    p.add_argument("--max_len", type=int, default=128)
+    p.add_argument("--gpu", action="store_true")
+    p.add_argument("--alpha", type=float, default=0.7)
+    p.add_argument("--output_dir", type=str, default="./output")
     return p.parse_args()
 
 
@@ -144,7 +141,7 @@ class EvalPipeline(StandalonePipeline):
                     break
 
             print(
-                f"模型收敛轮数 (Accuracy 达到最高值的 95%): {convergence_round if convergence_round != -1 else '未达到'}")
+                f"Model convergence epoch (Accuracy reaches 95% of maximum value): {convergence_round if convergence_round != -1 else 'Not achieved'}")
 
 
 def main():
@@ -160,27 +157,27 @@ def main():
     else:
         print(f"Using device: {device}. Did you forget to use --gpu?")
 
-    print("\n请选择训练模式：")
-    print("  [1] 仅使用 ResNet-18（图像）")
-    print("  [2] 仅使用 BERT（文本）")
-    print("  [3] 使用 ResNet-18 + BERT（多模态）")
-    choice = input("请输入1、2或3并回车: ").strip()
+    print("\nPlease select training mode:")
+    print("  [1] Use only ResNet-18 (image)")
+    print("  [2] Use only BERT (text)")
+    print("  [3] Use ResNet-18 + BERT (multimodal)")
+    choice = input("Please enter 1, 2, or 3 and press Enter: ").strip()
 
     use_image = False
     use_text = False
 
     if choice == "1":
         use_image = True
-        print("==> 已选择模式：仅图像")
+        print("==> Selected mode: Image only")
     elif choice == "2":
         use_text = True
-        print("==> 已选择模式：仅文本")
+        print("==> Selected mode: Text only")
     elif choice == "3":
         use_image = True
         use_text = True
-        print("==> 已选择模式：多模态")
+        print("==> Selected mode: Multimodal")
     else:
-        print("无效的选择，默认为多模态模式。")
+        print("Invalid selection, defaulting to multimodal mode.")
         use_image = True
         use_text = True
 
