@@ -49,7 +49,7 @@ class MultiModalNet(nn.Module):
         self.device = device
 
         if not self.use_image and not self.use_text:
-            raise ValueError("至少需要启用图像或文本模态中的一种。")
+            raise ValueError("At least one of the image or text modalities needs to be enabled.")
 
         self.img_encoder = None
         self.img_feat_dim = 0
@@ -66,7 +66,7 @@ class MultiModalNet(nn.Module):
             pre_trained_bert_path = bert_name
 
             if not os.path.exists(pre_trained_bert_path):
-                print(f"警告：预训练的 BERT 模型未在 '{pre_trained_bert_path}' 路径下找到。")
+                print(f"Warning: The pre-trained BERT model was not found at the path '{pre_trained_bert_path}'.")
                 temp_bert_model = AutoModelForSequenceClassification.from_pretrained('bert-base-chinese',
                                                                                      num_labels=num_classes)
             else:
@@ -90,7 +90,7 @@ class MultiModalNet(nn.Module):
         elif self.use_text:
             fused_output_dim = self.txt_feat_dim
         else:
-            raise ValueError("没有启用任何模态编码器。")
+            raise ValueError("No modal encoder is enabled.")
 
         self.fusion_mlp = nn.Sequential(
             nn.Linear(fused_output_dim, 1024),
@@ -133,7 +133,7 @@ class MultiModalNet(nn.Module):
         elif self.use_text:
             x = x_txt
         else:
-            raise ValueError("没有有效的模态输入。")
+            raise ValueError("No valid modal input.")
 
         fused_features = self.fusion_mlp(x)
         logits = self.classifier(fused_features)
