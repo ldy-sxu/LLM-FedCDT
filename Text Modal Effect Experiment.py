@@ -188,8 +188,8 @@ class CDTMultiModalDataset(Dataset):
 
         df = pd.read_excel(desc_xlsx, engine="openpyxl")
         self.desc_map = dict(zip(
-            df["编号"].astype(str),
-            df["医学语义描述"].astype(str)
+            df["Serial Number"].astype(str),
+            df["Medical semantic description"].astype(str)
         ))
 
         self.img_dir = img_dir
