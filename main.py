@@ -127,7 +127,7 @@ class EvalPipeline(StandalonePipeline):
 
         df_metrics = pd.DataFrame(self.metrics_history)
         df_metrics.to_csv(self.metrics_csv_path, index=False)
-        print(f"\n所有轮次的评估指标已保存到: {self.metrics_csv_path}")
+        print(f"\nEvaluation metrics for all epochs have been saved to: {self.metrics_csv_path}")
 
         if not df_metrics.empty:
             accuracies = df_metrics["accuracy"].values
