@@ -67,7 +67,7 @@ class MultiModalNet(nn.Module):
         self.device = device
 
         if not self.use_image and not self.use_text:
-            raise ValueError("至少需要启用图像或文本模态中的一种。")
+            raise ValueError("At least one of the image or text modalities must be enabled.")
 
         self.img_encoder = None
         self.img_feat_dim = 0
@@ -84,7 +84,7 @@ class MultiModalNet(nn.Module):
             pre_trained_bert_path = bert_name
 
             if not os.path.exists(pre_trained_bert_path):
-                print(f"警告：预训练的 BERT 模型未在 '{pre_trained_bert_path}' 路径下找到。")
+                print(f"Warning: Pretrained BERT model not found in path '{pre_trained_bert_path}'.")
                 temp_bert_model = AutoModelForSequenceClassification.from_pretrained('bert-base-chinese',
                                                                                      num_labels=num_classes)
             else:
@@ -108,7 +108,7 @@ class MultiModalNet(nn.Module):
         elif self.use_text:
             fused_output_dim = self.txt_feat_dim
         else:
-            raise ValueError("没有启用任何模态编码器。")
+            raise ValueError("No modality encoder is enabled.")
 
         self.fusion_mlp = nn.Sequential(
             nn.Linear(fused_output_dim, 1024),
@@ -151,7 +151,7 @@ class MultiModalNet(nn.Module):
         elif self.use_text:
             x = x_txt
         else:
-            raise ValueError("没有有效的模态输入。")
+            raise ValueError("No valid modality input.")
 
         fused_features = self.fusion_mlp(x)
         logits = self.classifier(fused_features)
@@ -200,7 +200,7 @@ class CDTMultiModalDataset(Dataset):
         self.mask_ratio = mask_ratio
 
     def _mask_text(self, text: str) -> str:
-        """ """
+        """Mask part of the text according to the specified ratio"""
         words = list(jieba.cut(text, cut_all=False))
         num_words_to_mask = int(len(words) * self.mask_ratio)
         if num_words_to_mask > 0:
@@ -210,7 +210,7 @@ class CDTMultiModalDataset(Dataset):
         return text
 
     def _permute_text(self, text: str) -> str:
-        """ """
+        """Randomly permute the words in the text"""
         words = list(jieba.cut(text, cut_all=False))
         random.shuffle(words)
         return "".join(words)
@@ -294,7 +294,7 @@ class CentralizedDataProcessor:
 
 def train_one_epoch(model: nn.Module, train_loader: DataLoader, optimizer: optim.Optimizer,
                     criterion: nn.Module, device: torch.device):
-    """ """
+    """Train the model for one epoch"""
     model.train()
     total_loss = 0.0
 
@@ -323,7 +323,7 @@ def train_one_epoch(model: nn.Module, train_loader: DataLoader, optimizer: optim
 
 
 def evaluate_metrics(model, dataloader, loss_fn, device, num_classes):
-    """ """
+    """Evaluate model performance and return metrics"""
     model.eval()
     total_loss = 0.0
     all_preds = []
@@ -370,23 +370,23 @@ def parse_args():
     p = argparse.ArgumentParser("Centralized MultiModal CDT")
     p.add_argument("--img_dir", type=str,
                    default=r"...",
-                   help="图像数据目录")
+                   help="Image data directory")
     p.add_argument("--label_txt", type=str,
                    default=r"...",
-                   help="标签文件路径")
+                   help="Label file path")
     p.add_argument("--desc_xlsx", type=str,
                    default=r"...",
-                   help="文本描述文件路径")
+                   help="Text description file path")
     p.add_argument("--bert_model", type=str,
                    default=r"...",
-                   help="BERT模型名称")
+                   help="BERT model name")
 
-    p.add_argument("--total_epochs", type=int, default=50, help="集中式学习的总训练轮次")
-    p.add_argument("--batch_size", type=int, default=32, help="批次大小")
-    p.add_argument("--lr", type=float, default=5e-5, help="学习率")
-    p.add_argument("--max_len", type=int, default=128, help="BERT文本最大长度")
-    p.add_argument("--gpu", action="store_true", help="是否使用 GPU")
-    p.add_argument("--output_dir", type=str, default="./output_centralized", help="结果输出目录")
+    p.add_argument("--total_epochs", type=int, default=50, help="Total training epochs for centralized learning")
+    p.add_argument("--batch_size", type=int, default=32, help="Batch size")
+    p.add_argument("--lr", type=float, default=5e-5, help="Learning rate")
+    p.add_argument("--max_len", type=int, default=128, help="BERT maximum text length")
+    p.add_argument("--gpu", action="store_true", help="Whether to use GPU")
+    p.add_argument("--output_dir", type=str, default="./output_centralized", help="Result output directory")
     return p.parse_args()
 
 
@@ -404,27 +404,27 @@ def main():
         print(f"Using device: {device}. Did you forget to use --gpu?")
     print("-" * 30)
 
-    print("\n请选择训练模式：")
-    print("  [1] 仅使用 ResNet-18（图像）")
-    print("  [2] 仅使用 BERT（文本）")
-    print("  [3] 使用 ResNet-18 + BERT（多模态）")
-    choice_modality = input("请输入1、2或3并回车: ").strip()
+    print("\nPlease select training mode:")
+    print("  [1] Use only ResNet-18 (image)")
+    print("  [2] Use only BERT (text)")
+    print("  [3] Use ResNet-18 + BERT (multimodal)")
+    choice_modality = input("Please enter 1, 2, or 3 and press Enter: ").strip()
 
     use_image = False
     use_text = False
 
     if choice_modality == "1":
         use_image = True
-        print("==> 已选择模式：仅图像")
+        print("==> Selected mode: Image only")
     elif choice_modality == "2":
         use_text = True
-        print("==> 已选择模式：仅文本")
+        print("==> Selected mode: Text only")
     elif choice_modality == "3":
         use_image = True
         use_text = True
-        print("==> 已选择模式：多模态")
+        print("==> Selected mode: Multimodal")
     else:
-        print("无效的选择，默认为多模态模式。")
+        print("Invalid selection, defaulting to multimodal mode.")
         use_image = True
         use_text = True
     print("-" * 30)
@@ -433,28 +433,28 @@ def main():
     mask_ratio = 0.0
 
     if use_text:
-        print("\n请选择文本鲁棒性实验模式：")
-        print("  [1] 原始文本（Original, 对比基线）")
-        print("  [2] 随机遮盖文本（Masking, 模拟文本信息缺失）")
-        print("  [3] 随机排列文本（Permutation, 模拟文本结构破坏）")
-        choice_text = input("请输入1、2或3并回车: ").strip()
+        print("\nPlease select text robustness experiment mode:")
+        print("  [1] Original text (baseline comparison)")
+        print("  [2] Random masking (simulate text information loss)")
+        print("  [3] Random permutation (simulate text structure destruction)")
+        choice_text = input("Please enter 1, 2, or 3 and press Enter: ").strip()
 
         if choice_text == "2":
             text_modification_type = "mask"
-            ratio_input = input("请输入文本遮盖比例（例如 0.2, 0.5, 0.8）: ").strip()
+            ratio_input = input("Please enter text masking ratio (e.g., 0.2, 0.5, 0.8): ").strip()
             try:
                 mask_ratio = float(ratio_input)
-                print(f"==> 已选择模式：随机遮盖，比例为 {mask_ratio}")
+                print(f"==> Selected mode: Random masking with ratio {mask_ratio}")
             except ValueError:
-                print("输入无效，默认为原始文本模式。")
+                print("Invalid input, defaulting to original text mode.")
                 text_modification_type = "original"
         elif choice_text == "3":
             text_modification_type = "permute"
-            print("==> 已选择模式：随机排列文本训练")
+            print("==> Selected mode: Random text permutation training")
         else:
-            print("==> 已选择模式：原始文本")
+            print("==> Selected mode: Original text")
     else:
-        print("文本模态未启用，跳过文本鲁棒性设置。")
+        print("Text modality not enabled, skipping text robustness settings.")
 
     print("-" * 30)
 
@@ -474,8 +474,8 @@ def main():
 
     train_loader = data_processor.get_train_dataloader(args.batch_size)
     test_loader = data_processor.get_test_dataloader(args.batch_size)
-    print(f"训练集大小: {len(train_loader.sampler)} 批次: {len(train_loader)}")
-    print(f"测试集大小: {len(test_loader.sampler)} 批次: {len(test_loader)}")
+    print(f"Training set size: {len(train_loader.sampler)} batches: {len(train_loader)}")
+    print(f"Test set size: {len(test_loader.sampler)} batches: {len(test_loader)}")
     print("-" * 30)
 
     num_classes = 5
@@ -492,7 +492,7 @@ def main():
 
     metrics_history = []
 
-    print(">>> 开始集中式训练 <<<")
+    print(">>> Starting centralized training <<<")
 
     for epoch in range(1, args.total_epochs + 1):
         train_loss = train_one_epoch(model, train_loader, optimizer, criterion, device)
@@ -512,7 +512,7 @@ def main():
 
     df_metrics = pd.DataFrame(metrics_history)
     df_metrics.to_csv(metrics_csv_path, index=False)
-    print(f"\n所有轮次的评估指标已保存到: {metrics_csv_path}")
+    print(f"\nEvaluation metrics for all epochs have been saved to: {metrics_csv_path}")
 
     if not df_metrics.empty:
         accuracies = df_metrics["accuracy"].values
@@ -526,7 +526,7 @@ def main():
                 break
 
         print(
-            f"模型收敛轮数 (Accuracy 达到最高值的 95%): {convergence_epoch if convergence_epoch != -1 else '未达到'}")
+            f"Model convergence epoch (Accuracy reaches 95% of maximum value): {convergence_epoch if convergence_epoch != -1 else 'Not achieved'}")
 
 
 if __name__ == "__main__":
